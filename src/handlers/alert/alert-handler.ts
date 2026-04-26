@@ -83,13 +83,12 @@ export class AlertHandler {
 
   private async sendNotification(alert: Alert, currentPrice: number, condition: Condition): Promise<void> {
     const movementLine =
-      condition === Condition.above ? format`🟢 Il prezzo ha ${bold("SUPERATO")}` : format`🔴 Il prezzo e ${bold("SCESO")} sotto`;
+      condition === Condition.above ? format`🟢 Il prezzo ha ${bold("SUPERATO")}` : format`🔴 Il prezzo è ${bold("SCESO")} sotto`;
 
     const message = blockquote(
-      format`🚨 ${bold(format`${underline("ALERT CRYPTO")}`)}
+      format`🚨 ${bold(format`${underline("ALERT")}`)}
 
 ${bold("🪙 Coin:")} ${code(`${alert.name} (${alert.symbol.toUpperCase()})`)}
-${bold("🆔 CoinGecko ID:")} ${code(alert.coinId)}
 ${movementLine} ${code(formatUsdPrice(alert.alertPrice))}
 ${bold("💰 Prezzo attuale:")} ${code(formatUsdPrice(currentPrice))}`,
     );

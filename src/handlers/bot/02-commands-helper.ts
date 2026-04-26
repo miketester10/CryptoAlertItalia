@@ -261,38 +261,31 @@ const sendCoinSelectionPrompt = async (ctx: MyMessageContext, symbol: string, ac
     action,
     querySymbol: symbol,
     alertPrice,
-    results: matches.map(mapCoinToSearchResult) as Prisma.InputJsonValue,
+    results: matches.map((coin) => mapCoinToSearchResult(coin)),
     expiresAt: new Date(Date.now() + SEARCH_SESSION_TTL_MINUTES * 60 * 1000),
   });
 
-  const message = buildSelectionMessage(symbol, matches, action, alertPrice);
+  const message = buildSelectionMessage(symbol, action, alertPrice);
   const keyboard = new InlineKeyboard();
 
   matches.forEach((coin, index) => {
-    keyboard.text(coin.name, selectSearchResult.pack({ sessionId: session.id, resultIndex: String(index) }), { style: "primary" }).row();
+    keyboard.text(`${coin.symbol.toUpperCase()} - ${coin.id}`, selectSearchResult.pack({ sessionId: session.id, resultIndex: String(index) }), { style: "primary" }).row();
   });
 
   await ctx.reply(message, { reply_markup: keyboard });
 };
 
-const buildSelectionMessage = (symbol: string, matches: readonly Coin[], action: SearchSessionAction, alertPrice?: number): FormattableString => {
+const buildSelectionMessage = (symbol: string, action: SearchSessionAction, alertPrice?: number): FormattableString => {
   const intro =
     action === SearchSessionAction.price
       ? "Ho trovato questi token. Premi il bottone corretto per vedere il prezzo."
       : `Ho trovato questi token. Premi il bottone corretto per registrare l'alert a ${alertPrice ? formatUsdPrice(alertPrice) : "-"}.`;
 
-  const list = matches
-    .slice(0, MAX_SEARCH_RESULTS)
-    .map((coin, index) => `${index + 1}. ${coin.id} | ${coin.symbol.toUpperCase()} | ${coin.name}`)
-    .join("\n");
-
   return blockquote(
     format`${bold("🔎 RISULTATI RICERCA")}
 
 ${bold("Simbolo cercato:")} ${code(symbol.toUpperCase())}
-${italic(intro)}
-
-${code(list)}`,
+${italic(intro)}`,
   );
 };
 
@@ -344,7 +337,7 @@ const registerAlertFromSelection = async (ctx: MyCallbackQueryContext<Record<str
   const message = blockquote(
     format`✅ ${bold(format`${underline("ALERT REGISTRATO")}`)}
 
-${bold("🪙 Coin:")} ${code(`${selectedCoin.name} (${selectedCoin.symbol.toUpperCase()})`)}
+${bold("🪙 Coin:")} ${code(selectedCoin.symbol.toUpperCase())}
 ${bold("🆔 CoinGecko ID:")} ${code(selectedCoin.id)}
 ${bold("🔔 Soglia:")} ${code(formatUsdPrice(session.alertPrice))}
 ${bold("💰 Prezzo attuale:")} ${code(formatUsdPrice(price))}`,
@@ -357,7 +350,7 @@ const buildPriceMessage = (coinId: string, symbol: string, name: string, price: 
   return blockquote(
     format`${bold("💰 PREZZO ATTUALE")}
 
-${bold("🪙 Coin:")} ${code(`${name} (${symbol.toUpperCase()})`)}
+${bold("🪙 Coin:")} ${code(symbol.toUpperCase())}
 ${bold("🆔 CoinGecko ID:")} ${code(coinId)}
 ${bold("💵 Prezzo USD:")} ${code(formatUsdPrice(price))}`,
   );

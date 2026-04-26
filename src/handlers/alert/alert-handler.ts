@@ -88,7 +88,7 @@ export class AlertHandler {
     const message = blockquote(
       format`🚨 ${bold(format`${underline("ALERT")}`)}
 
-${bold("🪙 Coin:")} ${code(`${alert.name} (${alert.symbol.toUpperCase()})`)}
+${bold("🪙 Coin:")} ${code(alert.symbol.toUpperCase())}
 ${movementLine} ${code(formatUsdPrice(alert.alertPrice))}
 ${bold("💰 Prezzo attuale:")} ${code(formatUsdPrice(currentPrice))}`,
     );

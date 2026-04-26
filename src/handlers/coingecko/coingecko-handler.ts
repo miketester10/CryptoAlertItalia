@@ -27,16 +27,11 @@ export class CoinGeckoHandler {
   async syncCoinList(): Promise<number> {
     const rawResponse = await this.apiHandler.get<unknown>(API.COINGECKO_COIN_LIST);
     const parsedResponse = coinGeckoCoinListResponseSchema.parse(rawResponse);
-    const normalizedCoins = parsedResponse.map((coin) => ({
-      id: coin.id,
-      symbol: coin.symbol.toLowerCase(),
-      name: coin.name,
-    }));
 
-    await this.databaseHandler.replaceCoinList(normalizedCoins);
-    logger.info(`✅ Coin list aggiornata con ${normalizedCoins.length} asset`);
+    await this.databaseHandler.replaceCoinList(parsedResponse);
+    logger.info(`✅ Coin list aggiornata con ${parsedResponse.length} asset`);
 
-    return normalizedCoins.length;
+    return parsedResponse.length;
   }
 
   async ensureCoinList(): Promise<void> {

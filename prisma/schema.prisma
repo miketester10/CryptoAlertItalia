@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  telegramId Int      @id @map("_id")
+  name       String
+  username   String?
+  alerts     Alert[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Alert {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  coinId         String
+  symbol         String
+  name           String
+  alertPrice     Float
+  lastCondition  Condition
+  lastCheckPrice Float
+  userTelegramId Int
+  user           User      @relation(fields: [userTelegramId], references: [telegramId])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userTelegramId])
+  @@index([userTelegramId, coinId, alertPrice])
+}
+
+model Coin {
+  id        String   @id @map("_id")
+  symbol    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([symbol])
+}
+
+model SearchSession {
+  id             String              @id @default(auto()) @map("_id") @db.ObjectId
+  userTelegramId Int
+  action         SearchSessionAction
+  querySymbol    String
+  alertPrice     Float?
+  results        Json
+  expiresAt      DateTime
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([userTelegramId, expiresAt])
+  @@index([expiresAt])
+}
+
+enum Condition {
+  above
+  below
+  equal
+}
+
+enum SearchSessionAction {
+  price
+  alert
+}

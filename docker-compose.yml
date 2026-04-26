@@ -1,0 +1,21 @@
+services:
+  CryptoAlertBot:
+    image: node:20
+    container_name: CryptoAlertBot
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Rome
+    expose:
+      - "3000"
+    command: ["sh", "-c", "npm install --include=dev && npx prisma generate && npx prisma db push && npm run start"]
+    restart: unless-stopped
+    networks:
+      - proxy-manager
+
+networks:
+  proxy-manager:
+    external: true

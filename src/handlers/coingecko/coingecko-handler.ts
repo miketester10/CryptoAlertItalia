@@ -48,7 +48,7 @@ export class CoinGeckoHandler {
     let results = await this.databaseHandler.findCoinsBySymbol(symbol.toLowerCase(), MAX_SEARCH_RESULTS);
 
     if (results.length === 0) {
-      logger.warn(`Coin list miss per simbolo ${symbol}. Aggiorno da CoinGecko.`);
+      logger.warn(`Coin non trovata. Simbolo: [${symbol}]. Aggiorno Coin List da CoinGecko.`);
       await this.syncCoinList();
       results = await this.databaseHandler.findCoinsBySymbol(symbol.toLowerCase(), MAX_SEARCH_RESULTS);
     }

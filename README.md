@@ -103,7 +103,7 @@ npm install
 
 ```env
 BOT_TOKEN=your_telegram_bot_token
-DATABASE_URL=mongodb://localhost:27017/crypto_alert_bot
+DATABASE_URL=DATABASE_URL=mongodb://localhost:27017/crypto_alert_italia_bot
 COINGECKO_API_KEY=your_demo_key
 PORT=3000
 NODE_ENV=development

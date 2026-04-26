@@ -165,11 +165,6 @@ export const handleSearchSelection = async (ctx: MyCallbackQueryContext<Record<s
       return;
     }
 
-    if (session.alertPrice === null) {
-      await ctx.editText(code("⚠️ Prezzo alert mancante."));
-      return;
-    }
-
     await registerAlertFromSelection(ctx, session, selectedCoin);
   } catch (error) {
     await errorHandler(error, ctx);
@@ -309,7 +304,7 @@ const registerAlertFromSelection = async (ctx: MyCallbackQueryContext<Record<str
   const price = await coinGeckoHandler.getCurrentPrice(selectedCoin.id);
 
   if (price === null || session.alertPrice === null) {
-    await ctx.editText(code("⚠️ Impossibile registrare l'alert: prezzo attuale non disponibile."));
+    await ctx.editText(code("⚠️ Impossibile registrare l'alert: prezzo attuale o alert price non disponibili."));
     return;
   }
 

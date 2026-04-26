@@ -343,7 +343,7 @@ ${bold("💰 Prezzo attuale:")} ${code(formatUsdPrice(price))}`,
 
 const buildPriceMessage = (coinId: string, symbol: string, name: string, price: number): FormattableString => {
   return blockquote(
-    format`${bold("💰 PREZZO ATTUALE")}
+    format`💰 ${bold(format`${underline("PREZZO ATTUALE")}`)}
 
 ${bold("🪙 Coin:")} ${code(symbol.toUpperCase())}
 ${bold("🆔 CoinID:")} ${code(coinId)}

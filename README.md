@@ -27,30 +27,68 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 
 ## Struttura
 
-Il progetto replica l'impostazione di `BorsaItalianaAlert`:
-
-```text
-src/
-  consts/
-  dto/
-  enums/
-  handlers/
-    alert/
-    api/
-    bot/
-    coingecko/
-    database/
-    error/
-    server/
-  jobs/
-  lifecycle/
-  logger/
-  schemas/
-  types/
-  utils/
-  main.ts
-prisma/
-  schema.prisma
+```
+├── 📁 prisma
+│   └── 📄 schema.prisma
+├── 📁 src
+│   ├── 📁 consts
+│   │   └── 📄 api.ts
+│   ├── 📁 dto
+│   │   ├── 📄 create-alert.dto.ts
+│   │   ├── 📄 create-search-session.dto.ts
+│   │   ├── 📄 create-user.dto.ts
+│   │   ├── 📄 update-alert.dto.ts
+│   │   └── 📄 update-user.dto.ts
+│   ├── 📁 enums
+│   │   ├── 📄 callback-id.enum.ts
+│   │   ├── 📄 callback-key.enum.ts
+│   │   └── 📄 command-type.enum.ts
+│   ├── 📁 handlers
+│   │   ├── 📁 alert
+│   │   │   └── 📄 alert-handler.ts
+│   │   ├── 📁 api
+│   │   │   └── 📄 api-handler.ts
+│   │   ├── 📁 bot
+│   │   │   ├── 📄 00-bot-handler.ts
+│   │   │   ├── 📄 01-commands-basic.helper.ts
+│   │   │   ├── 📄 02-commands-helper.ts
+│   │   │   ├── 📄 03-callbacks-helper.ts
+│   │   │   ├── 📄 04-callbacks-data.ts
+│   │   │   └── 📄 05-user-handler.ts
+│   │   ├── 📁 coingecko
+│   │   │   └── 📄 coingecko-handler.ts
+│   │   ├── 📁 database
+│   │   │   └── 📄 database-handler.ts
+│   │   ├── 📁 error
+│   │   │   └── 📄 error-handler.ts
+│   │   └── 📁 server
+│   │       └── 📄 server-handler.ts
+│   ├── 📁 interfaces
+│   │   └── 📄 coingecko-error-response.interface.ts
+│   ├── 📁 jobs
+│   │   ├── 📄 alert-price.job.ts
+│   │   └── 📄 coin-list-sync.job.ts
+│   ├── 📁 lifecycle
+│   │   └── 📄 shutdown.ts
+│   ├── 📁 logger
+│   │   └── 📄 logger.ts
+│   ├── 📁 schemas
+│   │   ├── 📄 coingecko-api.schema.ts
+│   │   ├── 📄 input-validator.schema.ts
+│   │   └── 📄 search-session.schema.ts
+│   ├── 📁 types
+│   │   ├── 📄 custom-context.type.ts
+│   │   └── 📄 telegram-options-custom.type.ts
+│   ├── 📁 utils
+│   │   └── 📄 price-formatter.ts
+│   └── 📄 main.ts
+├── ⚙️ .env.example
+├── ⚙️ .gitignore
+├── 📝 README.md
+├── ⚙️ docker-compose.yml
+├── ⚙️ package-lock.json
+├── ⚙️ package.json
+└── ⚙️ tsconfig.json
 ```
 
 ## Setup
@@ -66,6 +104,7 @@ npm install
 ```env
 BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=mongodb://localhost:27017/crypto_alert_bot
+COINGECKO_API_KEY=your_demo_key
 PORT=3000
 NODE_ENV=development
 ```

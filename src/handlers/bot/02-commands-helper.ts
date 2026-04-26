@@ -188,8 +188,8 @@ export const renderAlertDetails = async (ctx: MyCallbackQueryContext<Record<stri
     const message = blockquote(
       format`⚠️ ${bold(format`${underline("DETTAGLIO ALERT")}`)}
 
-${bold("🪙 Coin:")} ${code(`${alert.name} (${alert.symbol.toUpperCase()})`)}
-${bold("🆔 CoinGecko ID:")} ${code(alert.coinId)}
+${bold("🪙 Coin:")} ${code(alert.symbol.toUpperCase())}
+${bold("🆔 CoinID:")} ${code(alert.coinId)}
 ${bold("🔔 Alert Price:")} ${code(formatUsdPrice(alert.alertPrice))}`,
     );
 
@@ -338,7 +338,7 @@ const registerAlertFromSelection = async (ctx: MyCallbackQueryContext<Record<str
     format`✅ ${bold(format`${underline("ALERT REGISTRATO")}`)}
 
 ${bold("🪙 Coin:")} ${code(selectedCoin.symbol.toUpperCase())}
-${bold("🆔 CoinGecko ID:")} ${code(selectedCoin.id)}
+${bold("🆔 CoinID:")} ${code(selectedCoin.id)}
 ${bold("🔔 Soglia:")} ${code(formatUsdPrice(session.alertPrice))}
 ${bold("💰 Prezzo attuale:")} ${code(formatUsdPrice(price))}`,
   );
@@ -351,8 +351,8 @@ const buildPriceMessage = (coinId: string, symbol: string, name: string, price: 
     format`${bold("💰 PREZZO ATTUALE")}
 
 ${bold("🪙 Coin:")} ${code(symbol.toUpperCase())}
-${bold("🆔 CoinGecko ID:")} ${code(coinId)}
-${bold("💵 Prezzo USD:")} ${code(formatUsdPrice(price))}`,
+${bold("🆔 CoinID:")} ${code(coinId)}
+${bold("💵 Prezzo:")} ${code(formatUsdPrice(price))}`,
   );
 };
 

@@ -15,12 +15,14 @@ export const handleStartCommand = async (ctx: MyMessageContext): Promise<void> =
     const message = format`
 👋 Ciao ${name}
 
-Sono ${bold("Crypto Alert Bot 🤖")}
+Sono ${bold("Crypto Alert Italia Bot 🤖")}
+
+${blockquote("Monitora i prezzi delle crypto, scegli il token corretto e ricevi alert automatici.")}
 
 Per vedere tutti i comandi disponibili usa:
 ${blockquote(code("/help"))}
 
-${blockquote("Monitora prezzi crypto in USD, scegli il token corretto dalla coin list di CoinGecko e ricevi alert automatici ogni 2 minuti.")}`;
+${blockquote(`⚠️ Per maggiori informazioni contatta lo sviluppatore:\n@m1keehrmantraut`)}`;
 
     await ctx.reply(message, { link_preview_options: { is_disabled: true } });
   } catch (error) {
@@ -36,7 +38,7 @@ export const handleHelpCommand = async (ctx: MyMessageContext): Promise<void> =>
 ${bold("📚 ELENCO DEI COMANDI")}
 
 ${blockquote(
-  format`🔹${code("/prezzo <symbol>")} - Cerca il simbolo nella coin list di CoinGecko e ti fa scegliere il token corretto.
+  format`🔹${code("/prezzo <symbol>")} - Cerca il simbolo nella coin list e ti fa scegliere il token corretto.
 ${italic("Esempio:")} ${code("/prezzo btc")}
 🔹${code("/alert <symbol> <prezzo_usd>")} - Cerca il simbolo, scegli il token corretto e registra un alert bidirezionale.
 ${italic("Esempio:")} ${code("/alert btc 70000")}
@@ -47,7 +49,7 @@ ${italic("Esempio:")} ${code("/alert btc 70000")}
 )}
 
 ℹ️ ${underline(italic("Suggerimenti d'uso:"))}
-Usa sempre il ${code("symbol")} corretto, poi seleziona il ${code("CoinGecko ID")} giusto dai pulsanti.
+Usa sempre il ${code("symbol")} corretto, poi seleziona il ${code("CoinID")} giusto dai pulsanti.
 Il prezzo dell'alert deve usare il punto come separatore decimale.
 ${code("70000.50 -> corretto")}
 ${code("70000,50 -> errato")}`;

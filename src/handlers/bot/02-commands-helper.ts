@@ -1,6 +1,7 @@
 import { Alert, Coin, Prisma, SearchSession, SearchSessionAction } from "@prisma/client";
 import { FormattableString, InlineKeyboard, TelegramParams, blockquote, bold, code, format, italic, underline } from "gramio";
 import { MAX_SEARCH_RESULTS, SEARCH_SESSION_TTL_MINUTES } from "../../consts/api";
+import { AlertGroup } from "../../interfaces/alert-group.interface";
 import { logger } from "../../logger/logger";
 import { validateInput } from "../../schemas/input-validator.schema";
 import { CoinSearchResult, coinSearchResultsSchema } from "../../schemas/search-session.schema";
@@ -200,9 +201,9 @@ ${bold("🔔 Alert Price:")} ${code(formatUsdPrice(alert.alertPrice))}`,
     const replyOptions: Partial<TelegramParams.EditMessageTextParams> = {
       reply_markup: new InlineKeyboard()
         .text("✅ Elimina", deleteAlert.pack({ alertId: alert.id }), { style: "success" })
-        .text("❌ Indietro", openAlertGroup.pack({ coinId: alert.coinId }), { style: "danger" })
+        .text("💰 Prezzo attuale", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" })
         .row()
-        .text("💰 Prezzo attuale", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" }),
+        .text("⬅️ Indietro", openAlertGroup.pack({ coinId: alert.coinId }), { style: "danger" }),
     };
 
     await ctx.editText(message, replyOptions);
@@ -232,7 +233,7 @@ export const renderCurrentPriceFromAlert = async (ctx: MyCallbackQueryContext<Re
       reply_markup: new InlineKeyboard()
         .text("🔄 Aggiorna prezzo", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" })
         .row()
-        .text("⬅️ Indietro", openAlertDetails.pack({ alertId: alert.id })),
+        .text("⬅️ Indietro", openAlertDetails.pack({ alertId: alert.id }), { style: "danger" }),
     };
 
     await ctx.editText(message, replyOptions);
@@ -436,13 +437,6 @@ const getOwnedAlert = async (userTelegramId: number, alertId: string): Promise<A
 
   return alert;
 };
-
-interface AlertGroup {
-  coinId: string;
-  symbol: string;
-  name: string;
-  alerts: Alert[];
-}
 
 const groupAlertsByCoin = (alerts: readonly Alert[]): AlertGroup[] => {
   const alertsByCoin = new Map<string, AlertGroup>();

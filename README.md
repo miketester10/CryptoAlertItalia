@@ -65,6 +65,7 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 │   │   └── 📁 server
 │   │       └── 📄 server-handler.ts
 │   ├── 📁 interfaces
+│   │   ├── 📄 alert-group.interface.ts
 │   │   └── 📄 coingecko-error-response.interface.ts
 │   ├── 📁 jobs
 │   │   ├── 📄 alert-price.job.ts

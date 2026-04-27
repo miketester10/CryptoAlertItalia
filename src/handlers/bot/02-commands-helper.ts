@@ -97,9 +97,9 @@ export const handleAlertsAttiviCommand = async (ctx: MyMessageContext | MyCallba
     });
 
     const message = blockquote(
-      format`${bold("📋 ALERT ATTIVI")}
+      format`📋 ${bold(format`${underline("ALERT ATTIVI")}`)}
 
-${underline(italic("Seleziona un alert per vedere il prezzo attuale o eliminarlo."))}
+${italic("Seleziona un alert per vedere il prezzo attuale o eliminarlo.")}
 ${code(`Totale alert: ${alerts.length}`)}`,
     );
 
@@ -277,7 +277,7 @@ const buildSelectionMessage = (symbol: string, action: SearchSessionAction, aler
       : `Ho trovato questi token. Premi il bottone corretto per registrare l'alert a ${alertPrice ? formatUsdPrice(alertPrice) : "-"}.`;
 
   return blockquote(
-    format`${bold("🔎 RISULTATI RICERCA")}
+    format`🔎 ${bold(format`${underline("RISULTATI RICERCA")}`)}
 
 ${bold("Simbolo cercato:")} ${code(symbol.toUpperCase())}
 ${italic(intro)}`,

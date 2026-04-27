@@ -34,11 +34,10 @@ export const handleHelpCommand = async (ctx: MyMessageContext): Promise<void> =>
   try {
     await ctx.sendChatAction("typing");
 
-    const message = format`
-${bold("📚 ELENCO DEI COMANDI")}
+    const message = format`📚 ${bold(format`${underline("ELENCO DEI COMANDI")}`)}
 
 ${blockquote(
-  format`🔹${code("/prezzo <symbol>")} - Cerca il simbolo nella coin list e ti fa scegliere il token corretto.
+  format`🔹${code("/prezzo <symbol>")} - Cerca il simbolo nella coin list e scegli il token corretto.
 ${italic("Esempio:")} ${code("/prezzo btc")}
 🔹${code("/alert <symbol> <prezzo_usd>")} - Cerca il simbolo, scegli il token corretto e registra un alert bidirezionale.
 ${italic("Esempio:")} ${code("/alert btc 70000")}
@@ -49,10 +48,9 @@ ${italic("Esempio:")} ${code("/alert btc 70000")}
 )}
 
 ℹ️ ${underline(italic("Suggerimenti d'uso:"))}
-Usa sempre il ${code("symbol")} corretto, poi seleziona il ${code("CoinID")} giusto dai pulsanti.
 Il prezzo dell'alert deve usare il punto come separatore decimale.
-${code("70000.50 -> corretto")}
-${code("70000,50 -> errato")}`;
+${code("80000.50 -> corretto ✅")}
+${code("80000,50 -> errato ❌")}`;
 
     await ctx.reply(message);
   } catch (error) {

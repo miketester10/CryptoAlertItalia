@@ -1,7 +1,7 @@
 services:
-  CryptoAlertBot:
+  CryptoAlertItaliaBot:
     image: node:20
-    container_name: CryptoAlertBot
+    container_name: CryptoAlertItaliaBot
     working_dir: /app
     volumes:
       - .:/app
@@ -13,9 +13,9 @@ services:
       - "3000"
     command: ["sh", "-c", "npm install --include=dev && npx prisma generate && npx prisma db push && npm run start"]
     restart: unless-stopped
-    networks:
-      - proxy-manager
+#     networks:
+#       - proxy-manager
 
-networks:
-  proxy-manager:
-    external: true
+# networks:
+#   proxy-manager:
+#     external: true

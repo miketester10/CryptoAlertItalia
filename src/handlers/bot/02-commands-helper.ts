@@ -39,7 +39,7 @@ export const handlePrezzoCommand = async (ctx: MyMessageContext): Promise<void> 
 };
 
 export const handleAlertCommand = async (ctx: MyMessageContext): Promise<void> => {
-  const [, symbolRaw, priceRaw] = ctx.update?.message?.text?.trim().split(/\s+/) as [string, string | undefined, string | undefined];
+  const [command, symbolRaw, priceRaw] = ctx.update?.message?.text?.trim().split(/\s+/) as [string, string | undefined, string | undefined];
 
   try {
     await ctx.sendChatAction("typing");

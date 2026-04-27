@@ -9,7 +9,7 @@ let activeJob: CronJob | null = null;
 
 export const startCoinListSyncJob = async (): Promise<void> => {
   const job = new CronJob(
-    "0 */6 * * *",
+    "0 0 * * *",
     async () => {
       try {
         await coinGeckoHandler.syncCoinList();
@@ -26,7 +26,7 @@ export const startCoinListSyncJob = async (): Promise<void> => {
 
   job.start();
   activeJob = job;
-  logger.info("✅ CoinListSyncJob attivo: ogni 6 ore.");
+  logger.info("✅ CoinListSyncJob attivo: ogni 24 ore.");
 };
 
 export const stopCoinListSyncJob = (): void => {

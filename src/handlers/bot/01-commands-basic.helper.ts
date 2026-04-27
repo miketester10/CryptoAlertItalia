@@ -40,7 +40,7 @@ ${blockquote(
   format`🔹${code("/prezzo <symbol>")} - Cerca il simbolo nella coin list e scegli il token corretto.
 ${italic("Esempio:")} ${code("/prezzo btc")}
 🔹${code("/alert <symbol> <prezzo_usd>")} - Cerca il simbolo, scegli il token corretto e registra un alert bidirezionale.
-${italic("Esempio:")} ${code("/alert btc 70000")}
+${italic("Esempio:")} ${code("/alert btc 80000")}
 🔹${code("/alerts_attivi")} - Mostra gli alert registrati e permette di vedere il prezzo attuale o eliminare il singolo alert.
 🔹${code("/elimina_alerts")} - Elimina tutti gli alert attivi previa conferma.
 🔹${code("/start")} - Avvia il bot.

@@ -1,23 +1,10 @@
 import { Coin } from "@prisma/client";
 import { API, MAX_SEARCH_RESULTS } from "../../consts/api";
+import { EXCLUDED_COIN_ID_VALUES } from "../../consts/coingecko";
 import { ApiHandler } from "../api/api-handler";
-import {
-  CoinGeckoSimplePriceResponse,
-  coinGeckoCoinListResponseSchema,
-  coinGeckoSimplePriceResponseSchema,
-} from "../../schemas/coingecko-api.schema";
+import { CoinGeckoSimplePriceResponse, coinGeckoCoinListResponseSchema, coinGeckoSimplePriceResponseSchema } from "../../schemas/coingecko-api.schema";
 import { DatabaseHandler } from "../database/database-handler";
 import { logger } from "../../logger/logger";
-
-const EXCLUDED_COIN_ID_VALUES = [
-  "-peg-",
-  "-wormhole",
-  "wrapped",
-  "oec-",
-  "-iou",
-  "harrypotter",
-  "blackrocktradingcurrency",
-] as const;
 
 export class CoinGeckoHandler {
   private static _instance: CoinGeckoHandler;

@@ -9,6 +9,16 @@ import {
 import { DatabaseHandler } from "../database/database-handler";
 import { logger } from "../../logger/logger";
 
+const EXCLUDED_COIN_ID_VALUES = [
+  "-peg-",
+  "-wormhole",
+  "wrapped",
+  "oec-",
+  "-iou",
+  "harrypotter",
+  "blackrocktradingcurrency",
+] as const;
+
 export class CoinGeckoHandler {
   private static _instance: CoinGeckoHandler;
   private readonly apiHandler: ApiHandler = ApiHandler.getInstance();
@@ -27,11 +37,12 @@ export class CoinGeckoHandler {
   async syncCoinList(): Promise<number> {
     const rawResponse = await this.apiHandler.get<unknown>(API.COINGECKO_COIN_LIST);
     const parsedResponse = coinGeckoCoinListResponseSchema.parse(rawResponse);
+    const filteredResponse = parsedResponse.filter((coin) => !this.hasExcludedCoinIdValue(coin.id));
 
-    await this.databaseHandler.replaceCoinList(parsedResponse);
-    logger.info(`✅ Coin list aggiornata con ${parsedResponse.length} asset`);
+    await this.databaseHandler.replaceCoinList(filteredResponse);
+    logger.info(`✅ Coin list aggiornata con ${filteredResponse.length} asset`);
 
-    return parsedResponse.length;
+    return filteredResponse.length;
   }
 
   async ensureCoinList(): Promise<void> {
@@ -86,5 +97,11 @@ export class CoinGeckoHandler {
     });
 
     return `${API.COINGECKO_SIMPLE_PRICE}?${queryParams.toString()}`;
+  }
+
+  private hasExcludedCoinIdValue(coinId: string): boolean {
+    const normalizedCoinId = coinId.toLowerCase();
+
+    return EXCLUDED_COIN_ID_VALUES.some((excludedValue) => normalizedCoinId.includes(excludedValue));
   }
 }

@@ -1,6 +1,6 @@
 export const EXCLUDED_COIN_ID_VALUES = [
   "-peg-",
-  "-wormhole",
+  "wormhole",
   "wrapped",
   "oec-",
   "-iou",

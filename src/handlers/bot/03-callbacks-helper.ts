@@ -2,15 +2,17 @@ import { Bot, InlineKeyboard, TelegramParams, code } from "gramio";
 import { DatabaseHandler } from "../database/database-handler";
 import { errorHandler } from "../error/error-handler";
 import {
+  backToAlertDetails,
+  backToAlertGroup,
   backToAlertGroups,
   cancelDeleteAllAlerts,
-  currentPriceFromActiveAlert,
   deleteAlert,
   deleteAllAlerts,
-  openAlertDetails,
-  openAlertGroup,
   refreshSelectedPrice,
   selectSearchResult,
+  viewAlertDetails,
+  viewAlertGroup,
+  viewCurrentPriceFromAlert,
 } from "./04-callbacks-data";
 import { handleAlertsAttiviCommand, handleSearchSelection, renderAlertDetails, renderAlertGroupCommand, renderCurrentPriceFromAlert } from "./02-commands-helper";
 
@@ -27,13 +29,23 @@ export const setupCallbacks = (bot: Bot): void => {
     return ctx.answer();
   });
 
-  bot.callbackQuery(openAlertDetails, async (ctx) => {
+  bot.callbackQuery(viewAlertDetails, async (ctx) => {
     await renderAlertDetails(ctx, ctx.queryData.alertId);
     return ctx.answer();
   });
 
-  bot.callbackQuery(openAlertGroup, async (ctx) => {
+  bot.callbackQuery(viewAlertGroup, async (ctx) => {
     await renderAlertGroupCommand(ctx, ctx.queryData.coinId);
+    return ctx.answer();
+  });
+
+  bot.callbackQuery(backToAlertGroup, async (ctx) => {
+    await renderAlertGroupCommand(ctx, ctx.queryData.coinId);
+    return ctx.answer();
+  });
+
+  bot.callbackQuery(backToAlertDetails, async (ctx) => {
+    await renderAlertDetails(ctx, ctx.queryData.alertId);
     return ctx.answer();
   });
 
@@ -94,7 +106,7 @@ export const setupCallbacks = (bot: Bot): void => {
     return ctx.answer();
   });
 
-  bot.callbackQuery(currentPriceFromActiveAlert, async (ctx) => {
+  bot.callbackQuery(viewCurrentPriceFromAlert, async (ctx) => {
     await renderCurrentPriceFromAlert(ctx, ctx.queryData.alertId);
     return ctx.answer();
   });

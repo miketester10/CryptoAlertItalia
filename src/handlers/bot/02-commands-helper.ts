@@ -14,15 +14,17 @@ import { CoinGeckoHandler } from "../coingecko/coingecko-handler";
 import { AlertHandler } from "../alert/alert-handler";
 import { errorHandler } from "../error/error-handler";
 import {
+  backToAlertDetails,
+  backToAlertGroup,
   backToAlertGroups,
   cancelDeleteAllAlerts,
-  currentPriceFromActiveAlert,
   deleteAlert,
   deleteAllAlerts,
-  openAlertDetails,
-  openAlertGroup,
   refreshSelectedPrice,
   selectSearchResult,
+  viewAlertDetails,
+  viewAlertGroup,
+  viewCurrentPriceFromAlert,
 } from "./04-callbacks-data";
 
 const databaseHandler = DatabaseHandler.getInstance();
@@ -201,9 +203,9 @@ ${bold("🔔 Alert Price:")} ${code(formatUsdPrice(alert.alertPrice))}`,
     const replyOptions: Partial<TelegramParams.EditMessageTextParams> = {
       reply_markup: new InlineKeyboard()
         .text("✅ Elimina", deleteAlert.pack({ alertId: alert.id }), { style: "success" })
-        .text("💰 Prezzo attuale", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" })
+        .text("💰 Prezzo attuale", viewCurrentPriceFromAlert.pack({ alertId: alert.id }), { style: "primary" })
         .row()
-        .text("⬅️ Indietro", openAlertGroup.pack({ coinId: alert.coinId }), { style: "danger" }),
+        .text("⬅️ Indietro", backToAlertGroup.pack({ coinId: alert.coinId }), { style: "danger" }),
     };
 
     await ctx.editText(message, replyOptions);
@@ -231,9 +233,9 @@ export const renderCurrentPriceFromAlert = async (ctx: MyCallbackQueryContext<Re
     const message = buildPriceMessage(alert.coinId, alert.symbol, alert.name, price);
     const replyOptions: Partial<TelegramParams.EditMessageTextParams> = {
       reply_markup: new InlineKeyboard()
-        .text("🔄 Aggiorna prezzo", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" })
+        .text("🔄 Aggiorna prezzo", viewCurrentPriceFromAlert.pack({ alertId: alert.id }), { style: "primary" })
         .row()
-        .text("⬅️ Indietro", openAlertDetails.pack({ alertId: alert.id }), { style: "danger" }),
+        .text("⬅️ Indietro", backToAlertDetails.pack({ alertId: alert.id }), { style: "danger" }),
     };
 
     await ctx.editText(message, replyOptions);
@@ -300,7 +302,7 @@ const renderAlertGroupsList = async (ctx: MyMessageContext | MyCallbackQueryCont
 
   groupedAlerts.forEach((group) => {
     const buttonLabel = `${group.symbol.toUpperCase()} (${group.alerts.length})`;
-    keyboard.text(buttonLabel, openAlertGroup.pack({ coinId: group.coinId }), { style: "primary" }).row();
+    keyboard.text(buttonLabel, viewAlertGroup.pack({ coinId: group.coinId }), { style: "primary" }).row();
   });
 
   const message = blockquote(
@@ -326,7 +328,7 @@ const renderAlertsByCoinGroup = async (ctx: MyMessageContext | MyCallbackQueryCo
   const keyboard = new InlineKeyboard();
   selectedGroup.alerts.forEach((alert, index) => {
     keyboard
-      .text(`${index + 1}: ${formatUsdPrice(alert.alertPrice)}`, openAlertDetails.pack({ alertId: alert.id }), {
+      .text(`${index + 1}: ${formatUsdPrice(alert.alertPrice)}`, viewAlertDetails.pack({ alertId: alert.id }), {
         style: "primary",
       })
       .row();

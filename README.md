@@ -10,7 +10,7 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 - `/alerts_attivi` mostra la lista degli alert attivi con dettaglio, prezzo attuale ed eliminazione del singolo alert
 - `/elimina_alerts` elimina tutti gli alert previa conferma
 - refresh coin list da CoinGecko all'avvio ed ogni 24 ore
-- job alert ogni 2 minuti in produzione
+- job alert ogni 5 minuti in produzione
 - MongoDB con Prisma
 - validazione input con Zod
 - tipizzazione stretta, senza `any`
@@ -32,7 +32,8 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 │   └── 📄 schema.prisma
 ├── 📁 src
 │   ├── 📁 consts
-│   │   └── 📄 api.ts
+│   │   ├── 📄 api.ts
+│   │   └── 📄 coingecko.ts
 │   ├── 📁 dto
 │   │   ├── 📄 create-alert.dto.ts
 │   │   ├── 📄 create-search-session.dto.ts
@@ -148,7 +149,7 @@ npm run dev
 2. Il bot cerca `btc` nella coin list
 3. L'utente seleziona il token corretto
 4. Il bot salva l'alert con `coinId`, `symbol`, `name`, soglia e ultima condizione rilevata
-5. Il job eseguito ogni 2 minuti controlla i prezzi in batch con `simple/price`
+5. Il job eseguito ogni 5 minuti controlla i prezzi in batch con `simple/price`
 6. Se il prezzo passa sopra o sotto la soglia, il bot invia la notifica Telegram
 
 ## Verifica locale

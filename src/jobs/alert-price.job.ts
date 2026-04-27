@@ -3,7 +3,7 @@ import { AlertHandler } from "../handlers/alert/alert-handler";
 import { logger } from "../logger/logger";
 
 const alertHandler = AlertHandler.getInstance();
-const productionMinutes = 2;
+const productionMinutes = 5;
 const testMinutes = 1;
 let activeJob: CronJob | null = null;
 

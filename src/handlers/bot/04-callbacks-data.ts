@@ -2,6 +2,8 @@ import { CallbackData } from "gramio";
 import { CallbackId } from "../../enums/callback-id.enum";
 import { CallbackKey } from "../../enums/callback-key.enum";
 
+export const openAlertGroup = new CallbackData(CallbackId.OPEN_ALERT_GROUP).string(CallbackKey.COIN_ID);
+export const backToAlertGroups = new CallbackData(CallbackId.BACK_TO_ALERT_GROUPS);
 export const openAlertDetails = new CallbackData(CallbackId.OPEN_ALERT_DETAILS).string(CallbackKey.ALERT_ID);
 export const deleteAlert = new CallbackData(CallbackId.DELETE_ALERT).string(CallbackKey.ALERT_ID);
 export const deleteAllAlerts = new CallbackData(CallbackId.DELETE_ALL_ALERTS);

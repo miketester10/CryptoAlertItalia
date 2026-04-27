@@ -2,16 +2,17 @@ import { Bot, InlineKeyboard, TelegramParams, code } from "gramio";
 import { DatabaseHandler } from "../database/database-handler";
 import { errorHandler } from "../error/error-handler";
 import {
-  cancelDeleteAlert,
+  backToAlertGroups,
   cancelDeleteAllAlerts,
   currentPriceFromActiveAlert,
   deleteAlert,
   deleteAllAlerts,
   openAlertDetails,
+  openAlertGroup,
   refreshSelectedPrice,
   selectSearchResult,
 } from "./04-callbacks-data";
-import { handleAlertsAttiviCommand, handleSearchSelection, renderAlertDetails, renderCurrentPriceFromAlert } from "./02-commands-helper";
+import { handleAlertsAttiviCommand, handleSearchSelection, renderAlertDetails, renderAlertGroupCommand, renderCurrentPriceFromAlert } from "./02-commands-helper";
 
 const databaseHandler = DatabaseHandler.getInstance();
 
@@ -31,6 +32,11 @@ export const setupCallbacks = (bot: Bot): void => {
     return ctx.answer();
   });
 
+  bot.callbackQuery(openAlertGroup, async (ctx) => {
+    await renderAlertGroupCommand(ctx, ctx.queryData.coinId);
+    return ctx.answer();
+  });
+
   bot.callbackQuery(deleteAlert, async (ctx) => {
     try {
       const alert = await databaseHandler.findAlertById(ctx.queryData.alertId);
@@ -41,7 +47,15 @@ export const setupCallbacks = (bot: Bot): void => {
       }
 
       await databaseHandler.deleteAlertById(alert.id);
-      await handleAlertsAttiviCommand(ctx);
+
+      const remainingAlerts = await databaseHandler.findAllAlertsByTelegramId(ctx.from.id);
+      const hasSameCoinAlerts = remainingAlerts.some((remainingAlert) => remainingAlert.coinId === alert.coinId);
+
+      if (hasSameCoinAlerts) {
+        await renderAlertGroupCommand(ctx, alert.coinId);
+      } else {
+        await handleAlertsAttiviCommand(ctx);
+      }
     } catch (error) {
       await errorHandler(error, ctx);
     }
@@ -49,7 +63,7 @@ export const setupCallbacks = (bot: Bot): void => {
     return ctx.answer();
   });
 
-  bot.callbackQuery(cancelDeleteAlert, async (ctx) => {
+  bot.callbackQuery(backToAlertGroups, async (ctx) => {
     try {
       await handleAlertsAttiviCommand(ctx);
     } catch (error) {

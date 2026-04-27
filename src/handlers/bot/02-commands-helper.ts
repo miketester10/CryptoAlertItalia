@@ -12,7 +12,17 @@ import { DatabaseHandler } from "../database/database-handler";
 import { CoinGeckoHandler } from "../coingecko/coingecko-handler";
 import { AlertHandler } from "../alert/alert-handler";
 import { errorHandler } from "../error/error-handler";
-import { cancelDeleteAlert, cancelDeleteAllAlerts, currentPriceFromActiveAlert, deleteAlert, deleteAllAlerts, openAlertDetails, refreshSelectedPrice, selectSearchResult } from "./04-callbacks-data";
+import {
+  backToAlertGroups,
+  cancelDeleteAllAlerts,
+  currentPriceFromActiveAlert,
+  deleteAlert,
+  deleteAllAlerts,
+  openAlertDetails,
+  openAlertGroup,
+  refreshSelectedPrice,
+  selectSearchResult,
+} from "./04-callbacks-data";
 
 const databaseHandler = DatabaseHandler.getInstance();
 const coinGeckoHandler = CoinGeckoHandler.getInstance();
@@ -87,23 +97,22 @@ export const handleAlertsAttiviCommand = async (ctx: MyMessageContext | MyCallba
       return secondAlert.alertPrice - firstAlert.alertPrice;
     });
 
-    const keyboard = new InlineKeyboard();
-    alerts.forEach((alert, index) => {
-      keyboard
-        .text(`${index + 1}: ${alert.symbol.toUpperCase()} - ${formatUsdPrice(alert.alertPrice)}`, openAlertDetails.pack({ alertId: alert.id }), {
-          style: "primary",
-        })
-        .row();
-    });
+    await renderAlertGroupsList(ctx, alerts);
+  } catch (error) {
+    await errorHandler(error, ctx);
+  }
+};
 
-    const message = blockquote(
-      format`📋 ${bold(format`${underline("ALERT ATTIVI")}`)}
+export const renderAlertGroupCommand = async (ctx: MyCallbackQueryContext<Record<string, string>>, coinId: string): Promise<void> => {
+  try {
+    const alerts = await databaseHandler.findAllAlertsByTelegramId(ctx.from.id);
 
-${italic("Seleziona un alert per vedere il prezzo attuale o eliminarlo.")}
-${code(`Totale alert: ${alerts.length}`)}`,
-    );
+    if (alerts.length === 0) {
+      await ctx.editText(code("⚠️ Non hai nessun alert attivo."));
+      return;
+    }
 
-    await replyOrEdit(ctx, message, { reply_markup: keyboard });
+    await renderAlertsByCoinGroup(ctx, alerts, coinId);
   } catch (error) {
     await errorHandler(error, ctx);
   }
@@ -191,7 +200,7 @@ ${bold("🔔 Alert Price:")} ${code(formatUsdPrice(alert.alertPrice))}`,
     const replyOptions: Partial<TelegramParams.EditMessageTextParams> = {
       reply_markup: new InlineKeyboard()
         .text("✅ Elimina", deleteAlert.pack({ alertId: alert.id }), { style: "success" })
-        .text("❌ Indietro", cancelDeleteAlert.pack(), { style: "danger" })
+        .text("❌ Indietro", openAlertGroup.pack({ coinId: alert.coinId }), { style: "danger" })
         .row()
         .text("💰 Prezzo attuale", currentPriceFromActiveAlert.pack({ alertId: alert.id }), { style: "primary" }),
     };
@@ -282,6 +291,56 @@ const buildSelectionMessage = (symbol: string, action: SearchSessionAction, aler
 ${bold("Simbolo cercato:")} ${code(symbol.toUpperCase())}
 ${italic(intro)}`,
   );
+};
+
+const renderAlertGroupsList = async (ctx: MyMessageContext | MyCallbackQueryContext, alerts: readonly Alert[]): Promise<void> => {
+  const groupedAlerts = groupAlertsByCoin(alerts);
+  const keyboard = new InlineKeyboard();
+
+  groupedAlerts.forEach((group) => {
+    const buttonLabel = `${group.symbol.toUpperCase()} (${group.alerts.length})`;
+    keyboard.text(buttonLabel, openAlertGroup.pack({ coinId: group.coinId }), { style: "primary" }).row();
+  });
+
+  const message = blockquote(
+    format`📋 ${bold(format`${underline("ALERT ATTIVI")}`)}
+
+${italic("Seleziona una coin per vedere gli alert collegati.")}
+${code(`Totale alert: ${alerts.length}`)}
+${code(`Totale coin: ${groupedAlerts.length}`)}`,
+  );
+
+  await replyOrEdit(ctx, message, { reply_markup: keyboard });
+};
+
+const renderAlertsByCoinGroup = async (ctx: MyMessageContext | MyCallbackQueryContext, alerts: readonly Alert[], coinId: string): Promise<void> => {
+  const groupedAlerts = groupAlertsByCoin(alerts);
+  const selectedGroup = groupedAlerts.find((group) => group.coinId === coinId);
+
+  if (!selectedGroup) {
+    await replyOrEdit(ctx, code("❌ Gruppo alert non trovato."));
+    return;
+  }
+
+  const keyboard = new InlineKeyboard();
+  selectedGroup.alerts.forEach((alert, index) => {
+    keyboard
+      .text(`${index + 1}: ${formatUsdPrice(alert.alertPrice)}`, openAlertDetails.pack({ alertId: alert.id }), {
+        style: "primary",
+      })
+      .row();
+  });
+  keyboard.text("⬅️ Indietro", backToAlertGroups.pack(), { style: "danger" });
+
+  const message = blockquote(
+    format`🪙 ${bold(format`${underline("ALERT COIN")}`)}
+
+${bold("Coin:")} ${code(selectedGroup.symbol.toUpperCase())}
+${bold("CoinID:")} ${code(selectedGroup.coinId)}
+${code(`Alert presenti: ${selectedGroup.alerts.length}`)}`,
+  );
+
+  await replyOrEdit(ctx, message, { reply_markup: keyboard });
 };
 
 const renderCurrentPrice = async (ctx: MyCallbackQueryContext<Record<string, string>>, sessionId: string, resultIndex: number, selectedCoin: CoinSearchResult): Promise<void> => {
@@ -376,6 +435,40 @@ const getOwnedAlert = async (userTelegramId: number, alertId: string): Promise<A
   }
 
   return alert;
+};
+
+interface AlertGroup {
+  coinId: string;
+  symbol: string;
+  name: string;
+  alerts: Alert[];
+}
+
+const groupAlertsByCoin = (alerts: readonly Alert[]): AlertGroup[] => {
+  const alertsByCoin = new Map<string, AlertGroup>();
+
+  alerts.forEach((alert) => {
+    const existingGroup = alertsByCoin.get(alert.coinId);
+
+    if (existingGroup) {
+      existingGroup.alerts.push(alert);
+      return;
+    }
+
+    alertsByCoin.set(alert.coinId, {
+      coinId: alert.coinId,
+      symbol: alert.symbol,
+      name: alert.name,
+      alerts: [alert],
+    });
+  });
+
+  return [...alertsByCoin.values()]
+    .map((group) => ({
+      ...group,
+      alerts: [...group.alerts].sort((firstAlert, secondAlert) => secondAlert.alertPrice - firstAlert.alertPrice),
+    }))
+    .sort((firstGroup, secondGroup) => firstGroup.symbol.localeCompare(secondGroup.symbol) || firstGroup.coinId.localeCompare(secondGroup.coinId));
 };
 
 const mapCoinToSearchResult = (coin: Coin): CoinSearchResult => ({

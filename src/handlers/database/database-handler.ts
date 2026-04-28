@@ -135,11 +135,9 @@ export class DatabaseHandler {
     return this.prisma.coin.count();
   }
 
-  async findCoinsBySymbol(symbol: string, take: number): Promise<Coin[]> {
+  async findCoinsBySymbol(symbol: string): Promise<Coin[]> {
     return this.prisma.coin.findMany({
       where: { symbol },
-      orderBy: [{ name: "asc" }, { id: "asc" }],
-      take,
     });
   }
 

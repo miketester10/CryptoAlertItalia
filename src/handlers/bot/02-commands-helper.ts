@@ -1,7 +1,8 @@
-import { Alert, Coin, Prisma, SearchSession, SearchSessionAction } from "@prisma/client";
+import { Alert, SearchSession, SearchSessionAction } from "@prisma/client";
 import { FormattableString, InlineKeyboard, TelegramParams, blockquote, bold, code, format, italic, underline } from "gramio";
 import { MAX_SEARCH_RESULTS, SEARCH_SESSION_TTL_MINUTES } from "../../consts/api";
 import { AlertGroup } from "../../interfaces/alert-group.interface";
+import { CoinListItem } from "../../interfaces/coin-list-item.interface";
 import { logger } from "../../logger/logger";
 import { validateInput } from "../../schemas/input-validator.schema";
 import { CoinSearchResult, coinSearchResultsSchema } from "../../schemas/search-session.schema";
@@ -467,7 +468,7 @@ const groupAlertsByCoin = (alerts: readonly Alert[]): AlertGroup[] => {
     .sort((firstGroup, secondGroup) => firstGroup.symbol.localeCompare(secondGroup.symbol) || firstGroup.coinId.localeCompare(secondGroup.coinId));
 };
 
-const mapCoinToSearchResult = (coin: Coin): CoinSearchResult => ({
+const mapCoinToSearchResult = (coin: CoinListItem): CoinSearchResult => ({
   id: coin.id,
   symbol: coin.symbol,
   name: coin.name,

@@ -9,7 +9,8 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 - `/alert <symbol> <prezzo_usd>` registra alert bidirezionali sopra/sotto soglia
 - `/alerts_attivi` mostra la lista degli alert attivi con dettaglio, prezzo attuale ed eliminazione del singolo alert
 - `/elimina_alerts` elimina tutti gli alert previa conferma
-- refresh coin list da CoinGecko all'avvio ed ogni 24 ore
+- refresh coin list da CoinGecko ogni 24 ore tramite cron job
+- fallback live a CoinGecko se la coin manca nel DB, senza persistenza immediata
 - job alert ogni 5 minuti in produzione
 - MongoDB con Prisma
 - validazione input con Zod
@@ -66,6 +67,7 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 │   │       └── 📄 server-handler.ts
 │   ├── 📁 interfaces
 │   │   ├── 📄 alert-group.interface.ts
+│   │   ├── 📄 coin-list-item.interface.ts
 │   │   └── 📄 coingecko-error-response.interface.ts
 │   ├── 📁 jobs
 │   │   ├── 📄 alert-price.job.ts
@@ -138,20 +140,22 @@ npm run dev
 ## Flusso `/prezzo`
 
 1. L'utente invia `/prezzo btc`
-2. Il bot cerca `btc` nella coin list salvata da CoinGecko
-3. Il bot mostra i token trovati con `id`, `symbol`, `name` e pulsanti inline
-4. L'utente preme ad esempio `Bitcoin`
-5. Il bot chiama `simple/price` con `ids=bitcoin`
-6. Il bot invia il prezzo in USD con messaggio formattato
+2. Il bot cerca `btc` nella coin list salvata su MongoDB
+3. Se il simbolo non e presente nel DB, il bot usa una chiamata live a CoinGecko senza aggiornare subito il database
+4. Il bot mostra i token trovati con `id`, `symbol`, `name` e pulsanti inline
+5. L'utente preme ad esempio `Bitcoin`
+6. Il bot chiama `simple/price` con `ids=bitcoin`
+7. Il bot invia il prezzo in USD con messaggio formattato
 
 ## Flusso `/alert`
 
 1. L'utente invia `/alert btc 80000`
-2. Il bot cerca `btc` nella coin list
-3. L'utente seleziona il token corretto
-4. Il bot salva l'alert con `coinId`, `symbol`, `name`, soglia e ultima condizione rilevata
-5. Il job eseguito ogni 5 minuti controlla i prezzi in batch con `simple/price`
-6. Se il prezzo passa sopra o sotto la soglia, il bot invia la notifica Telegram
+2. Il bot cerca `btc` nella coin list del database
+3. Se non lo trova, usa un fallback live a CoinGecko senza salvare la nuova coin list
+4. L'utente seleziona il token corretto
+5. Il bot salva l'alert con `coinId`, `symbol`, `name`, soglia e ultima condizione rilevata
+6. Il job eseguito ogni 5 minuti controlla i prezzi in batch con `simple/price`
+7. Se il prezzo passa sopra o sotto la soglia, il bot invia la notifica Telegram
 
 ## Verifica locale
 

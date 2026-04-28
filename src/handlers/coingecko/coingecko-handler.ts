@@ -1,6 +1,6 @@
-import { Coin } from "@prisma/client";
 import { API, MAX_SEARCH_RESULTS } from "../../consts/api";
 import { EXCLUDED_COIN_ID_VALUES } from "../../consts/coingecko";
+import { CoinListItem } from "../../interfaces/coin-list-item.interface";
 import { ApiHandler } from "../api/api-handler";
 import { CoinGeckoSimplePriceResponse, coinGeckoCoinListResponseSchema, coinGeckoSimplePriceResponseSchema } from "../../schemas/coingecko-api.schema";
 import { DatabaseHandler } from "../database/database-handler";
@@ -22,9 +22,7 @@ export class CoinGeckoHandler {
   }
 
   async syncCoinList(): Promise<number> {
-    const rawResponse = await this.apiHandler.get<unknown>(API.COINGECKO_COIN_LIST);
-    const parsedResponse = coinGeckoCoinListResponseSchema.parse(rawResponse);
-    const filteredResponse = parsedResponse.filter((coin) => !this.hasExcludedCoinIdValue(coin.id));
+    const filteredResponse = await this.fetchFilteredCoinList();
 
     await this.databaseHandler.replaceCoinList(filteredResponse);
     logger.info(`✅ Coin list aggiornata con ${filteredResponse.length} asset`);
@@ -32,26 +30,22 @@ export class CoinGeckoHandler {
     return filteredResponse.length;
   }
 
-  async ensureCoinList(): Promise<void> {
-    const coinsCount = await this.databaseHandler.countCoins();
+  async searchCoinsBySymbol(symbol: string): Promise<CoinListItem[]> {
+    const normalizedSymbol = symbol.toLowerCase();
+    const resultsFromDatabase = await this.databaseHandler.findCoinsBySymbol(normalizedSymbol);
 
-    if (coinsCount === 0) {
-      await this.syncCoinList();
-    }
-  }
-
-  async searchCoinsBySymbol(symbol: string): Promise<Coin[]> {
-    await this.ensureCoinList();
-
-    let results = await this.databaseHandler.findCoinsBySymbol(symbol.toLowerCase(), MAX_SEARCH_RESULTS);
-
-    if (results.length === 0) {
-      logger.warn(`Coin non trovata. Simbolo: [${symbol}]. Aggiorno Coin List da CoinGecko.`);
-      await this.syncCoinList();
-      results = await this.databaseHandler.findCoinsBySymbol(symbol.toLowerCase(), MAX_SEARCH_RESULTS);
+    if (resultsFromDatabase.length > 0) {
+      return this.selectCoinMatches(resultsFromDatabase.map((coin) => ({
+        id: coin.id,
+        symbol: coin.symbol,
+        name: coin.name,
+      })), normalizedSymbol);
     }
 
-    return results;
+    logger.warn(`Coin non trovata nel database. Simbolo: [${symbol}]. Eseguo fallback live verso CoinGecko senza persistenza.`);
+    const liveCoinList = await this.fetchFilteredCoinList();
+
+    return this.selectCoinMatches(liveCoinList, normalizedSymbol);
   }
 
   async getCurrentPrice(coinId: string): Promise<number | null> {
@@ -84,6 +78,20 @@ export class CoinGeckoHandler {
     });
 
     return `${API.COINGECKO_SIMPLE_PRICE}?${queryParams.toString()}`;
+  }
+
+  private async fetchFilteredCoinList(): Promise<CoinListItem[]> {
+    const rawResponse = await this.apiHandler.get<unknown>(API.COINGECKO_COIN_LIST);
+    const parsedResponse = coinGeckoCoinListResponseSchema.parse(rawResponse);
+
+    return parsedResponse.filter((coin) => !this.hasExcludedCoinIdValue(coin.id));
+  }
+
+  private selectCoinMatches(coinList: readonly CoinListItem[], symbol: string): CoinListItem[] {
+    return coinList
+      .filter((coin) => coin.symbol === symbol)
+      .sort((firstCoin, secondCoin) => firstCoin.name.localeCompare(secondCoin.name) || firstCoin.id.localeCompare(secondCoin.id))
+      .slice(0, MAX_SEARCH_RESULTS);
   }
 
   private hasExcludedCoinIdValue(coinId: string): boolean {

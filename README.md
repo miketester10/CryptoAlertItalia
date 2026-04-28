@@ -14,7 +14,6 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 - job alert ogni 5 minuti in produzione
 - MongoDB con Prisma
 - validazione input con Zod
-- tipizzazione stretta, senza `any`
 
 ## Stack
 
@@ -157,11 +156,3 @@ npm run dev
 6. Il job eseguito ogni 5 minuti controlla i prezzi in batch con `simple/price`
 7. Se il prezzo passa sopra o sotto la soglia, il bot invia la notifica Telegram
 
-## Verifica locale
-
-Comando eseguito:
-
-```bash
-npx prisma generate
-npm run typecheck
-```

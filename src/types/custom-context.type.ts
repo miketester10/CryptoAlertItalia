@@ -9,6 +9,6 @@ export type MyUserSourceContext = MyMessageContext | MyGenericCallbackQueryConte
 
 export const isCallbackContext = (
   ctx: MyMessageContext | MyCallbackQueryContext,
-): ctx is MyCallbackQueryContext<Record<string, string>> => {
+): ctx is MyCallbackQueryContext => {
   return !("reply" in ctx);
 };

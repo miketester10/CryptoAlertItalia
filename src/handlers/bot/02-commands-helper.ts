@@ -107,7 +107,7 @@ export const handleAlertsAttiviCommand = async (ctx: MyMessageContext | MyCallba
   }
 };
 
-export const renderAlertGroupCommand = async (ctx: MyCallbackQueryContext<Record<string, string>>, coinId: string): Promise<void> => {
+export const renderAlertGroupCommand = async (ctx: MyCallbackQueryContext, coinId: string): Promise<void> => {
   try {
     const alerts = await databaseHandler.findAllAlertsByTelegramId(ctx.from.id);
 
@@ -150,7 +150,7 @@ export const handleEliminaAlertsCommand = async (ctx: MyMessageContext): Promise
   }
 };
 
-export const handleSearchSelection = async (ctx: MyCallbackQueryContext<Record<string, string>>, sessionId: string, resultIndexRaw: string, options?: { refreshOnly?: boolean }): Promise<void> => {
+export const handleSearchSelection = async (ctx: MyCallbackQueryContext, sessionId: string, resultIndexRaw: string, options?: { refreshOnly?: boolean }): Promise<void> => {
   try {
     const session = await getValidSearchSession(ctx, sessionId);
 
@@ -184,7 +184,7 @@ export const handleSearchSelection = async (ctx: MyCallbackQueryContext<Record<s
   }
 };
 
-export const renderAlertDetails = async (ctx: MyCallbackQueryContext<Record<string, string>>, alertId: string): Promise<void> => {
+export const renderAlertDetails = async (ctx: MyCallbackQueryContext, alertId: string): Promise<void> => {
   try {
     const alert = await getOwnedAlert(ctx.from.id, alertId);
 
@@ -215,7 +215,7 @@ ${bold("🔔 Alert Price:")} ${code(formatUsdPrice(alert.alertPrice))}`,
   }
 };
 
-export const renderCurrentPriceFromAlert = async (ctx: MyCallbackQueryContext<Record<string, string>>, alertId: string): Promise<void> => {
+export const renderCurrentPriceFromAlert = async (ctx: MyCallbackQueryContext, alertId: string): Promise<void> => {
   try {
     const alert = await getOwnedAlert(ctx.from.id, alertId);
 
@@ -347,7 +347,7 @@ ${code(`Alert presenti: ${selectedGroup.alerts.length}`)}`,
   await replyOrEdit(ctx, message, { reply_markup: keyboard });
 };
 
-const renderCurrentPrice = async (ctx: MyCallbackQueryContext<Record<string, string>>, sessionId: string, resultIndex: number, selectedCoin: CoinSearchResult): Promise<void> => {
+const renderCurrentPrice = async (ctx: MyCallbackQueryContext, sessionId: string, resultIndex: number, selectedCoin: CoinSearchResult): Promise<void> => {
   const price = await coinGeckoHandler.getCurrentPrice(selectedCoin.id);
 
   if (price === null) {
@@ -363,7 +363,7 @@ const renderCurrentPrice = async (ctx: MyCallbackQueryContext<Record<string, str
   await ctx.editText(message, replyOptions);
 };
 
-const registerAlertFromSelection = async (ctx: MyCallbackQueryContext<Record<string, string>>, session: SearchSession, selectedCoin: CoinSearchResult): Promise<void> => {
+const registerAlertFromSelection = async (ctx: MyCallbackQueryContext, session: SearchSession, selectedCoin: CoinSearchResult): Promise<void> => {
   const price = await coinGeckoHandler.getCurrentPrice(selectedCoin.id);
 
   if (price === null || session.alertPrice === null) {
@@ -414,7 +414,7 @@ ${bold("💵 Prezzo:")} ${code(formatUsdPrice(price))}`,
   );
 };
 
-const getValidSearchSession = async (ctx: MyCallbackQueryContext<Record<string, string>>, sessionId: string): Promise<SearchSession | null> => {
+const getValidSearchSession = async (ctx: MyCallbackQueryContext, sessionId: string): Promise<SearchSession | null> => {
   const session = await databaseHandler.findSearchSessionById(sessionId);
 
   if (!session || session.userTelegramId !== ctx.from.id) {

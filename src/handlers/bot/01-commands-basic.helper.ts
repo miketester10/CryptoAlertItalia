@@ -4,8 +4,10 @@ import { logger } from "../../logger/logger";
 import { errorHandler } from "../error/error-handler";
 
 export const handleStartCommand = async (ctx: MyMessageContext): Promise<void> => {
-  const telegramId = ctx.from?.id;
-  const name = ctx.from?.firstName ?? "Trader";
+  if (!ctx.from) return;
+
+  const telegramId = ctx.from.id;
+  const name = ctx.from.firstName;
 
   logger.info(`Bot avviato da: ${name} - Telegram ID: ${telegramId}`);
 

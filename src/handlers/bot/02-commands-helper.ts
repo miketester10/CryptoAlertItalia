@@ -73,7 +73,9 @@ export const handleAlertCommand = async (ctx: MyMessageContext): Promise<void> =
 };
 
 export const handleAlertsAttiviCommand = async (ctx: MyMessageContext | MyCallbackQueryContext): Promise<void> => {
-  const userTelegramId = ctx.from?.id;
+  if (!ctx.from) return;
+
+  const userTelegramId = ctx.from.id;
 
   if (!userTelegramId) {
     return;
@@ -123,7 +125,9 @@ export const renderAlertGroupCommand = async (ctx: MyCallbackQueryContext, coinI
 };
 
 export const handleEliminaAlertsCommand = async (ctx: MyMessageContext): Promise<void> => {
-  const userTelegramId = ctx.from?.id;
+  if (!ctx.from) return;
+
+  const userTelegramId = ctx.from.id;
 
   if (!userTelegramId) {
     return;
@@ -255,6 +259,8 @@ export const replyOrEdit = async (ctx: MyMessageContext | MyCallbackQueryContext
 };
 
 const sendCoinSelectionPrompt = async (ctx: MyMessageContext, symbol: string, action: SearchSessionAction, alertPrice?: number): Promise<void> => {
+  if (!ctx.from) return;
+
   const matches = await coinGeckoHandler.searchCoinsBySymbol(symbol);
 
   if (matches.length === 0) {
@@ -265,7 +271,7 @@ const sendCoinSelectionPrompt = async (ctx: MyMessageContext, symbol: string, ac
   await databaseHandler.deleteExpiredSearchSessions();
 
   const session = await databaseHandler.createSearchSession({
-    userTelegramId: ctx.from?.id ?? 0,
+    userTelegramId: ctx.from.id,
     action,
     querySymbol: symbol,
     alertPrice,

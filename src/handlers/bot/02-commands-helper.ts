@@ -75,18 +75,12 @@ export const handleAlertCommand = async (ctx: MyMessageContext): Promise<void> =
 export const handleAlertsAttiviCommand = async (ctx: MyMessageContext | MyCallbackQueryContext): Promise<void> => {
   if (!ctx.from) return;
 
-  const userTelegramId = ctx.from.id;
-
-  if (!userTelegramId) {
-    return;
-  }
-
   try {
     if (!isCallbackContext(ctx)) {
       await ctx.sendChatAction("typing");
     }
 
-    const alerts = await databaseHandler.findAllAlertsByTelegramId(userTelegramId);
+    const alerts = await databaseHandler.findAllAlertsByTelegramId(ctx.from.id);
 
     if (alerts.length === 0) {
       await replyOrEdit(ctx, code("⚠️ Non hai nessun alert attivo."));
@@ -127,16 +121,10 @@ export const renderAlertGroupCommand = async (ctx: MyCallbackQueryContext, coinI
 export const handleEliminaAlertsCommand = async (ctx: MyMessageContext): Promise<void> => {
   if (!ctx.from) return;
 
-  const userTelegramId = ctx.from.id;
-
-  if (!userTelegramId) {
-    return;
-  }
-
   try {
     await ctx.sendChatAction("typing");
 
-    const alerts = await databaseHandler.findAllAlertsByTelegramId(userTelegramId);
+    const alerts = await databaseHandler.findAllAlertsByTelegramId(ctx.from.id);
 
     if (alerts.length === 0) {
       await ctx.reply(code("⚠️ Non hai nessun alert attivo da eliminare."));

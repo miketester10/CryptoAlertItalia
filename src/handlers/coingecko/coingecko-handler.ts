@@ -2,7 +2,11 @@ import { API, MAX_SEARCH_RESULTS } from "../../consts/api";
 import { EXCLUDED_COIN_ID_VALUES } from "../../consts/coingecko";
 import { CoinListItem } from "../../interfaces/coin-list-item.interface";
 import { ApiHandler } from "../api/api-handler";
-import { CoinGeckoSimplePriceResponse, coinGeckoCoinListResponseSchema, coinGeckoSimplePriceResponseSchema } from "../../schemas/coingecko-api.schema";
+import {
+  CoinGeckoSimplePriceResponse,
+  coinGeckoCoinSchema,
+  coinGeckoSimplePriceResponseSchema,
+} from "../../schemas/coingecko-api.schema";
 import { DatabaseHandler } from "../database/database-handler";
 import { logger } from "../../logger/logger";
 
@@ -35,14 +39,19 @@ export class CoinGeckoHandler {
     const resultsFromDatabase = await this.databaseHandler.findCoinsBySymbol(normalizedSymbol);
 
     if (resultsFromDatabase.length > 0) {
-      return this.selectCoinMatches(resultsFromDatabase.map((coin) => ({
-        id: coin.id,
-        symbol: coin.symbol,
-        name: coin.name,
-      })), normalizedSymbol);
+      return this.selectCoinMatches(
+        resultsFromDatabase.map((coin) => ({
+          id: coin.id,
+          symbol: coin.symbol,
+          name: coin.name,
+        })),
+        normalizedSymbol,
+      );
     }
 
-    logger.warn(`Coin non trovata nel database. Simbolo: [${symbol}]. Eseguo fallback live verso CoinGecko senza persistenza.`);
+    logger.warn(
+      `Coin non trovata nel database. Simbolo: [${symbol}]. Eseguo fallback live verso CoinGecko senza persistenza.`,
+    );
     const liveCoinList = await this.fetchFilteredCoinList();
 
     return this.selectCoinMatches(liveCoinList, normalizedSymbol);
@@ -62,7 +71,8 @@ export class CoinGeckoHandler {
     }
 
     const rawResponse = await this.apiHandler.get<unknown>(this.buildSimplePriceUrl(uniqueCoinIds));
-    const parsedResponse: CoinGeckoSimplePriceResponse = coinGeckoSimplePriceResponseSchema.parse(rawResponse);
+    const parsedResponse: CoinGeckoSimplePriceResponse =
+      coinGeckoSimplePriceResponseSchema.parse(rawResponse);
 
     Object.entries(parsedResponse).forEach(([coinId, value]) => {
       priceMap.set(coinId, value.usd);
@@ -82,21 +92,45 @@ export class CoinGeckoHandler {
 
   private async fetchFilteredCoinList(): Promise<CoinListItem[]> {
     const rawResponse = await this.apiHandler.get<unknown>(API.COINGECKO_COIN_LIST);
-    const parsedResponse = coinGeckoCoinListResponseSchema.parse(rawResponse);
 
-    return parsedResponse.filter((coin) => !this.hasExcludedCoinIdValue(coin.id));
+    if (!Array.isArray(rawResponse)) {
+      throw new Error("La Coin list restituita da CoinGecko non è un array.");
+    }
+
+    const validCoins: CoinListItem[] = [];
+
+    for (const coin of rawResponse) {
+      const result = coinGeckoCoinSchema.safeParse(coin);
+      if (result.success) {
+        validCoins.push(result.data);
+      }
+    }
+
+    if (validCoins.length !== rawResponse.length) {
+      logger.warn(
+        `Rimosse ${rawResponse.length - validCoins.length} coin non valide dalla Coin list di CoinGecko.`,
+      );
+    }
+
+    return validCoins.filter((coin) => !this.hasExcludedCoinIdValue(coin.id));
   }
 
   private selectCoinMatches(coinList: readonly CoinListItem[], symbol: string): CoinListItem[] {
     return coinList
       .filter((coin) => coin.symbol === symbol)
-      .sort((firstCoin, secondCoin) => firstCoin.name.localeCompare(secondCoin.name) || firstCoin.id.localeCompare(secondCoin.id))
+      .sort(
+        (firstCoin, secondCoin) =>
+          firstCoin.name.localeCompare(secondCoin.name) ||
+          firstCoin.id.localeCompare(secondCoin.id),
+      )
       .slice(0, MAX_SEARCH_RESULTS);
   }
 
   private hasExcludedCoinIdValue(coinId: string): boolean {
     const normalizedCoinId = coinId.toLowerCase();
 
-    return EXCLUDED_COIN_ID_VALUES.some((excludedValue) => normalizedCoinId.includes(excludedValue));
+    return EXCLUDED_COIN_ID_VALUES.some((excludedValue) =>
+      normalizedCoinId.includes(excludedValue),
+    );
   }
 }

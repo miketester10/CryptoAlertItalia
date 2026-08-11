@@ -98,17 +98,22 @@ export class CoinGeckoHandler {
     }
 
     const validCoins: CoinListItem[] = [];
+    const invalidCoins: unknown[] = [];
 
     for (const coin of rawResponse) {
       const result = coinGeckoCoinSchema.safeParse(coin);
+
       if (result.success) {
         validCoins.push(result.data);
+      } else {
+        invalidCoins.push(coin);
       }
     }
 
-    if (validCoins.length !== rawResponse.length) {
+    if (invalidCoins.length > 0) {
       logger.warn(
-        `Rimosse ${rawResponse.length - validCoins.length} coin non valide dalla Coin list di CoinGecko.`,
+        { invalidCoins },
+        `Rimosse ${invalidCoins.length} coin non valide dalla Coin list di CoinGecko.`,
       );
     }
 

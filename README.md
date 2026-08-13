@@ -17,6 +17,7 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 
 ## Stack
 
+- Bun (runtime)
 - TypeScript strict
 - Gramio
 - Prisma + MongoDB
@@ -89,7 +90,7 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 ├── ⚙️ .gitignore
 ├── 📝 README.md
 ├── ⚙️ docker-compose.yml
-├── ⚙️ package-lock.json
+├── ⚙️ bun.lock
 ├── ⚙️ package.json
 └── ⚙️ tsconfig.json
 ```
@@ -99,14 +100,14 @@ Bot Telegram in TypeScript per cercare token nella coin list di CoinGecko, legge
 1. Installa le dipendenze
 
 ```bash
-npm install
+bun install
 ```
 
 2. Crea `.env` partendo da `.env.example`
 
 ```env
 BOT_TOKEN=your_telegram_bot_token
-DATABASE_URL=DATABASE_URL=mongodb://localhost:27017/crypto_alert_italia_bot
+DATABASE_URL=mongodb://localhost:27017/crypto_alert_italia_bot
 COINGECKO_API_KEY=your_demo_key
 PORT=3000
 NODE_ENV=development
@@ -115,15 +116,25 @@ NODE_ENV=development
 3. Genera il client Prisma e applica lo schema
 
 ```bash
-npx prisma generate
-npx prisma db push
+bunx prisma generate
+bunx prisma db push
 ```
 
 4. Avvia il bot
 
 ```bash
-npm run dev
+bun run dev
 ```
+
+In alternativa, con Docker:
+
+```bash
+docker compose up -d
+```
+
+## Requisiti
+
+- [Bun](https://bun.sh) >= 1.x (il progetto usa Bun al posto di Node.js/npm)
 
 ## Comandi
 

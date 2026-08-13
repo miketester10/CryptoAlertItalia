@@ -1,6 +1,6 @@
 services:
   CryptoAlertItaliaBot:
-    image: node:20
+    image: oven/bun:1
     container_name: CryptoAlertItaliaBot
     working_dir: /app
     volumes:
@@ -11,7 +11,7 @@ services:
       - TZ=Europe/Rome
     expose:
       - "3000"
-    command: ["sh", "-c", "npm install --include=dev && npx prisma generate && npx prisma db push && npm run start"]
+    command: ["sh", "-c", "bun install && bunx prisma generate && bunx prisma db push && bun run start"]
     restart: unless-stopped
 #     networks:
 #       - proxy-manager

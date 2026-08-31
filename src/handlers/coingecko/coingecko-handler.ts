@@ -97,6 +97,10 @@ export class CoinGeckoHandler {
       throw new Error("La Coin list restituita da CoinGecko non è un array.");
     }
 
+    if (rawResponse.length === 0) {
+      throw new Error("La coin list restituita da CoinGecko è vuota.");
+    }
+
     const validCoins: CoinListItem[] = [];
     const invalidCoins: unknown[] = [];
 

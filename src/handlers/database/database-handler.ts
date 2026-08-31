@@ -147,15 +147,30 @@ export class DatabaseHandler {
     });
   }
 
+  /**
+   * Sostituisce in modo atomico l'intera coin list.
+   *
+   * La vecchia implementazione faceva `deleteMany()` + `createMany()` come
+   * operazioni separate: se una falliva (o il processo si interrompeva in
+   * mezzo), il database restava in uno stato inconsistente (es. vuoto).
+   *
+   * Qui le due operazioni sono racchiuse in una transaction MongoDB: se una
+   * delle due fallisce, l'intera transazione viene annullata e il database
+   * rimane esattamente com'era prima.
+   *
+   * NOTA: le transaction su MongoDB richiedono un replica set (verificato).
+   */
   async replaceCoinList(coins: readonly CoinGeckoCoinListItemResponse[]): Promise<void> {
-    await this.prisma.coin.deleteMany();
     const data: Prisma.CoinCreateManyInput[] = coins.map((coin) => ({
       id: coin.id,
       symbol: coin.symbol,
       name: coin.name,
     }));
 
-    await this.prisma.coin.createMany({ data });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.coin.deleteMany();
+      await tx.coin.createMany({ data });
+    });
   }
 
   async countCoins(): Promise<number> {

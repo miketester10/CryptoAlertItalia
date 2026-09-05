@@ -418,7 +418,7 @@ const getValidSearchSession = async (ctx: MyCallbackQueryContext, sessionId: str
 
   if (session.expiresAt.getTime() < Date.now()) {
     await databaseHandler.deleteSearchSessionById(session.id);
-    await ctx.editText(code("⚠️ La selezione e scaduta. Ripeti il comando."));
+    await ctx.editText(code("⚠️ La sessione è scaduta. Ripeti il comando."));
     return null;
   }
 

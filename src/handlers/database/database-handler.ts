@@ -167,10 +167,26 @@ export class DatabaseHandler {
       name: coin.name,
     }));
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.coin.deleteMany();
-      await tx.coin.createMany({ data });
-    });
+    await this.prisma.$transaction(
+      async (tx) => {
+        const startDelete = performance.now();
+        await tx.coin.deleteMany();
+        const deleteMs = performance.now() - startDelete;
+
+        const startCreate = performance.now();
+        await tx.coin.createMany({ data });
+        const createMs = performance.now() - startCreate;
+
+        const totalMs = deleteMs + createMs;
+
+        logger.info(
+          `⌛️ Performance: deleteMany ${deleteMs.toFixed(2)}ms | createMany ${createMs.toFixed(2)}ms | totale ${totalMs.toFixed(2)}ms | (${data.length} asset)`,
+        );
+      },
+      {
+        timeout: 30_000, // tempo massimo della transazione -> 30 secondi
+      },
+    );
   }
 
   async countCoins(): Promise<number> {
